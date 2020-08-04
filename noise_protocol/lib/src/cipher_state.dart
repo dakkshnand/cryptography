@@ -22,6 +22,7 @@ class CipherState {
   // Cipher used for encrypting/decrypting.
   final NoiseCipher cipher;
 
+
   // The Noise specification refers to this with _k_.
   SecretKey _secretKey;
 
@@ -97,7 +98,7 @@ class CipherState {
   }
 
   /// See the [specification](https://noiseprotocol.org/noise.html).
-  Future<void> rekey() async {
-    throw UnimplementedError();
+  Future<void> rekey(SecretKey secretKey) async {
+    cipher.implementation.newSecretKeySync(length: 32);
   }
 }

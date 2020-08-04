@@ -30,7 +30,7 @@ class AESGCMOnCtrCipherState implements CipherState{
   }
 
   @override
-  Future<void> rekey() {
+  Future<void> rekey(SecretKey secretKey) {
     // TODO: implement rekey
     throw UnimplementedError();
   }
