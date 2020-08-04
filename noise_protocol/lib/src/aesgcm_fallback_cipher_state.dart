@@ -1,8 +1,54 @@
+import 'dart:typed_data';
+
 import 'package:cryptography/src/secret_key.dart';
 import 'package:noise_protocol/noise_protocol.dart';
+import 'package:noise_protocol/src/crypto/ghash.dart';
+import 'package:noise_protocol/src/crypto/rijndael_aes.dart';
+
+import 'noise.dart';
 
 class AESGCMFallbackCipherState implements CipherState{
-  AESGCMFallbackCipherState();
+  RijndaelAES aes;
+  int n;
+  Uint8List iv;
+  Uint8List enciv;
+  Uint8List hashKey;
+  GHASH ghash;
+  bool haskey;
+
+  AESGCMFallbackCipherState(){
+    aes = RijndaelAES();
+    n = 0;
+    iv = Uint8List(16);
+    enciv = Uint8List(16);
+    hashKey = Uint8List(16);
+    ghash = GHASH();
+    haskey = false;
+  }
+
+  void destroy(){
+    aes.destroy();
+    ghash.destroy();
+    Noise.destroy(hashKey);
+    Noise.destroy(iv);
+    Noise.destroy(enciv);
+  }
+
+  String getCipherName(){
+    return "AESGCM";
+  }
+
+  int getKeyLength(){
+    return 32;
+  }
+
+  int getMACLength(){
+    return haskey ? 16 : 0;
+  }
+
+  bool hasKey(){
+    return haskey;
+  }
 
   @override
   // TODO: implement cipher
@@ -10,7 +56,7 @@ class AESGCMFallbackCipherState implements CipherState{
 
   @override
   // TODO: implement counter
-  int get counter => throw UnimplementedError();
+  int get counter => n;
 
   @override
   Future<List<int>> decrypt(List<int> cipherText, {List<int> aad}) {
@@ -22,11 +68,6 @@ class AESGCMFallbackCipherState implements CipherState{
   Future<List<int>> encrypt(List<int> cipherTex, {List<int> aad}) {
     // TODO: implement encrypt
     throw UnimplementedError();
-  }
-
-  @override
-  void initializeKey(List<int> cipherTex) {
-    // TODO: implement initialize
   }
 
   @override
@@ -42,6 +83,17 @@ class AESGCMFallbackCipherState implements CipherState{
   @override
   void initialize(SecretKey secretKey) {
     // TODO: implement initialize
+  }
+
+  CipherState fork(Uint8List key, int offset){
+    CipherState cipher;
+    cipher = AESGCMFallbackCipherState();
+    cipher.initialize(secretKey);
+    return cipher;
+  }
+
+  void setNonce(int nonce){
+    n = nonce;
   }
 
 }
