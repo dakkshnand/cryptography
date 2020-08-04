@@ -1,12 +1,31 @@
+import 'dart:typed_data';
+
+import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/cryptography.dart';
 import 'package:cryptography/src/secret_key.dart';
 import 'package:noise_protocol/noise_protocol.dart';
+import 'package:noise_protocol/src/crypto/ghash.dart';
 
 class AESGCMOnCtrCipherState implements CipherState{
-  AESGCMOnCtrCipherState();
+  NoiseCipher aesCtr_cipher;
+  SecretKey keySpec;
+  int n;
+  Uint8List iv;
+  Uint8List hashKey;
+  GHASH ghash;
+
+  AESGCMOnCtrCipherState(){
+    aesCtr_cipher = CipherWithAppendedMac(aesCtr, Hmac(sha512)) as NoiseCipher;
+    keySpec = null;
+    n = 0;
+    iv = Uint8List(16);
+    hashKey = Uint8List(16);
+    ghash = GHASH();
+  }
 
   @override
   // TODO: implement cipher
-  NoiseCipher get cipher => throw UnimplementedError();
+  NoiseCipher get cipher => NoiseCipher.aesGcm;
 
   @override
   // TODO: implement counter
