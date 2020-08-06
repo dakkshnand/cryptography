@@ -95,9 +95,9 @@ class ChaChaPolyState implements CipherState{
   Future<void> rekey(SecretKey secretKey) async {
     var intZeros = List<int>.generate(32, (index) => 0);
     var zeros = Uint8List.fromList(intZeros);
-    var zerolen = Uint8List(0);
+    var zero_byte = Uint8List(0);
     var list = await cipher.implementation.encrypt(zeros, secretKey: secretKey,
-        nonce: cipher.nonce(counter), aad: zerolen);
+        nonce: cipher.nonce(counter), aad: zero_byte);
     return list.getRange(0, 32);
   }
 

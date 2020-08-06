@@ -65,19 +65,24 @@ class AESGCMOnCtrCipherState implements CipherState{
   @override
   Future<List<int>> decrypt(List<int> cipherText, {List<int> aad}) {
     // TODO: implement decrypt
-    throw UnimplementedError();
+    return aesCtr_cipher.decrypt(cipherText, secretKey: secretKey, nonce: cipher.nonce(counter), aad: aad);
   }
 
   @override
   Future<List<int>> encrypt(List<int> cipherTex, {List<int> aad}) {
     // TODO: implement encrypt
-    throw UnimplementedError();
+    return aesCtr_cipher.encrypt(cipherTex, secretKey: secretKey, nonce: cipher.nonce(counter), aad: aad);
   }
 
   @override
-  Future<void> rekey(SecretKey secretKey) {
+  Future<void> rekey(SecretKey secretKey) async {
     // TODO: implement rekey
-    throw UnimplementedError();
+    var intZeros = List<int>.generate(32, (index) => 0);
+    var zeros = Uint8List.fromList(intZeros);
+    var zero_byte = Uint8List(0);
+    var list = await cipher.implementation.encrypt(zeros, secretKey: secretKey,
+        nonce: cipher.nonce(counter), aad: zero_byte);
+    return list.getRange(0, 32);
   }
 
   @override
@@ -87,14 +92,7 @@ class AESGCMOnCtrCipherState implements CipherState{
   @override
   void initialize(SecretKey secretKey) {
     // TODO: implement initialize
-    keySpec = secretKey;
-    var zeroes = List<int>.generate(iv.lengthInBytes, (index) => 0);
-    var zeroBytes = Uint8List.fromList(zeroes);
-
-    iv.replaceRange(0, iv.lengthInBytes, zeroBytes);
-    hashKey.replaceRange(0, hashKey.lengthInBytes, zeroBytes);
-    ghash.reset_new(hashKey, 0);
-    n = 0;
+    secretKey = secretKey;
   }
 
   CipherState fork(Uint8List key, int offset){

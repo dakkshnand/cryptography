@@ -35,7 +35,7 @@ class AESGCMFallbackCipherState implements CipherState{
   }
 
   String getCipherName(){
-    return "AESGCM";
+    return 'AESGCM';
   }
 
   int getKeyLength(){
@@ -52,7 +52,7 @@ class AESGCMFallbackCipherState implements CipherState{
 
   @override
   // TODO: implement cipher
-  NoiseCipher get cipher => throw UnimplementedError();
+  NoiseCipher get cipher => NoiseCipher.aesGcm;
 
   @override
   // TODO: implement counter
@@ -61,19 +61,24 @@ class AESGCMFallbackCipherState implements CipherState{
   @override
   Future<List<int>> decrypt(List<int> cipherText, {List<int> aad}) {
     // TODO: implement decrypt
-    throw UnimplementedError();
+    return cipher.implementation.decrypt(cipherText, secretKey: secretKey, nonce: cipher.nonce(counter), aad: aad);
   }
 
   @override
   Future<List<int>> encrypt(List<int> cipherTex, {List<int> aad}) {
     // TODO: implement encrypt
-    throw UnimplementedError();
+    return cipher.implementation.encrypt(cipherTex, secretKey: secretKey, nonce: cipher.nonce(counter), aad: aad);
   }
 
   @override
-  Future<void> rekey(SecretKey secretKey) {
+  Future<void> rekey(SecretKey secretKey) async {
     // TODO: implement rekey
-    throw UnimplementedError();
+    var intZeros = List<int>.generate(32, (index) => 0);
+    var zeros = Uint8List.fromList(intZeros);
+    var zero_byte = Uint8List(0);
+    var list = await cipher.implementation.encrypt(zeros, secretKey: secretKey,
+        nonce: cipher.nonce(counter), aad: zero_byte);
+    return list.getRange(0, 32);
   }
 
   @override
@@ -83,6 +88,7 @@ class AESGCMFallbackCipherState implements CipherState{
   @override
   void initialize(SecretKey secretKey) {
     // TODO: implement initialize
+    secretKey = secretKey;
   }
 
   CipherState fork(Uint8List key, int offset){
